@@ -55,12 +55,11 @@ app.get("/auto-login", async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      // executablePath:
-      //   process.env.PRODUCTION == "true"
-      //     ? puppeteer.executablePath()
-      //     : executablePath,
+      executablePath:
+        process.env.PRODUCTION == "true"
+          ? puppeteer.executablePath()
+          : executablePath,
       headless: false,
-      executablePath,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
