@@ -1,0 +1,14 @@
+chmod 400 puppeteer.pem 
+ssh ec2-user@13.233.133.192 -i puppeteer.pem 
+
+
+rm -rf Puppeteer-Automation
+
+git clone https://github.com/InterestingPlus/Puppeteer-Automation.git
+cd Puppeteer-Automation
+npm install
+
+pm2 start index.js --name puppeteer-app
+pm2 delete puppeteer-app
+pm2 restart puppeteer-app
+pm2 log puppeteer-app
