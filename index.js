@@ -224,7 +224,7 @@ app.get("/auto-login", async (req, res) => {
     }
   } catch (err) {
     console.log("❌ Automation failed:", err);
-    return res.status(500).json({ error: "Internal error." });
+    return res.status(500).json({ error: `Internal error. \n ${err}` });
   }
 });
 
@@ -264,7 +264,7 @@ app.get("/get-receipt", async (req, res) => {
     );
   } catch (err) {
     console.log("❌ Automation failed:", err);
-    return res.status(500).json({ error: "Internal error." });
+    return res.status(500).json({ error: `Internal error. \n ${err}` });
   }
 });
 
