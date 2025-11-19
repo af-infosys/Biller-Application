@@ -1,13 +1,17 @@
 const express = require("express");
 // const puppeteer = require("puppeteer-core");
 const puppeteer = require("puppeteer");
+
+const dotenv = require("dotenv");
+dotenv.config();
+
 const app = express();
 app.use(express.json());
 
 const PORT = 3000;
 
 // 👇 Replace with your actual Chrome path
-// const chromePath = "/usr/bin/google-chrome";
+const executablePath = "/usr/bin/google-chrome"; // or Windows/macOS path
 
 app.get("/", (req, res) => {
   res.send("Hello World <a href='/auto-login'>Get Logged In</a>");
@@ -42,17 +46,32 @@ app.get("/auto-login", async (req, res) => {
   const login_id = "28494",
     password = "Mgp@28494";
 
+  console.log(
+    "Chromium path:",
+    process.env.PRODUCTION == "true"
+      ? puppeteer.executablePath()
+      : "==== not Chrome Path ===="
+  );
+
   try {
     const browser = await puppeteer.launch({
-      executablePath: puppeteer.executablePath(),
-      headless: true,
+      // executablePath:
+      //   process.env.PRODUCTION == "true"
+      //     ? puppeteer.executablePath()
+      //     : executablePath,
+      headless: false,
+      executablePath,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(0);
+
+    console.log("Opening page...");
     await page.goto("https://gramsuvidha.gujarat.gov.in", {
       waitUntil: "domcontentloaded",
     });
+    console.log("Opened!");
 
     // 🧾 Fill Login ID
     await page.type('input[name="txtSiteID"]', login_id);
@@ -234,9 +253,11 @@ app.get("/auto-login", async (req, res) => {
 app.get("/get-receipt", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
-      executablePath: puppeteer.executablePath(),
-      headless: true, // Show browser for debug
-      // executablePath,
+      executablePath:
+        process.env.PRODUCTION == "true"
+          ? puppeteer.executablePath()
+          : executablePath,
+      headless: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
@@ -272,7 +293,13 @@ app.get("/get-receipt", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(
+    `🚀 Server running at ${process.env.PRODUCTION} ${
+      process.env.PRODUCTION == "true"
+        ? "https://web-automation-oqmy.onrender.com"
+        : `http://localhost:${PORT}`
+    }`
+  );
 });
 
 // 		<option selected="selected" value="220E8302-1B69-4D00-8A4F-BEF8224D305D">તલાટી</option>
