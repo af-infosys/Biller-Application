@@ -1,0 +1,18 @@
+Solution 1: Use a VPS located in INDIA
+
+Providers (India region available):
+- Linode Mumbai
+- DigitalOcean Bangalore
+- Vultr Mumbai
+- Hostinger VPS India
+- Netmagic / Sify VPS
+- Aapka apna personal server broadband se (thoda jugaad)
+
+
+India region wale VPS:
+- Provider	Starting Price	Region
+- Linode	₹450–₹600/month	Mumbai
+- DigitalOcean	₹500–₹600/month	Bangalore
+- Vultr	₹450–₹500/month	Mumbai
+- Hostinger	~₹400/month	India
+- Sify/Netmagic	expensive af	India

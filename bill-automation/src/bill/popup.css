@@ -1,0 +1,73 @@
+.main-btn {
+  padding: 14px 26px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99;
+}
+
+.popup {
+  background: #020617;
+  padding: 25px;
+  border-radius: 14px;
+  width: 360px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+  color: white;
+}
+
+.popup h2 {
+  text-align: center;
+  margin-bottom: 18px;
+  color: #38bdf8;
+}
+
+.popup input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: none;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 11px;
+  margin-top: 8px;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  background: #ef4444;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.result {
+  margin-top: 12px;
+  font-size: 13px;
+  text-align: center;
+}
