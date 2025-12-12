@@ -76,7 +76,7 @@ const Main = () => {
         return;
       }
 
-      const result = await fetch(`${BASE_URL}/data/${sheetId}`);
+      const result = await fetch(`${await apiPath()}/api/bill-data/${sheetId}`);
 
       if (!result.ok) {
         throw new Error("Network response was not ok");

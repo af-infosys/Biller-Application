@@ -6,6 +6,7 @@ build/
 
 # General
 node_modules/
+/node_modules
 .cache/
 .env
 .env.local
