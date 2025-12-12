@@ -17,7 +17,7 @@ const PORT = 5000;
 const executablePath = "/usr/bin/google-chrome"; // or Windows/macOS path
 
 app.get("/", (req, res) => {
-  res.send("Hello World <a href='/auto-login'>Get Logged In</a>");
+  res.send("Hello World <a href='/fetch-data'>Get Logged In</a>");
 });
 
 // ✅ Helper to get option value by its visible text
@@ -345,7 +345,7 @@ app.post("/store-data", async (req, res) => {
   console.log("End Point '/store-data' is Called!");
 
   const data = req.body;
-  console.log("Received data from client:", data);
+  console.log("Received data from client:", data?.record);
 
   // const sheetId = "1lJ6pxYikIq5sG4OQwuzIodO4uVt-xo9XeK4iD2Ibj8o";
   const sheetId = process.env.WORK_SHEET_ID;
@@ -414,12 +414,16 @@ app.post("/store-data", async (req, res) => {
     const response = await sheet.insert(sheetId, "23994", [
       data?.record?.cMilkatNos || "",
       data?.record?.CHouseOwnersName || "",
+      data?.record?.cHouseKabjedarName || "",
       data?.record?.CHouseNo || "",
-      data?.record?.CHouseKeepersName || "",
       data?.record?.cSocietyName || "",
+      data?.record?.cMobileNo || "",
       category,
       data?.record?.CDescription || "",
       data?.record?.NHouseValue || "",
+
+      data?.record?.nBillNo || "",
+
       JSON.stringify(data?.record?.TaxAmounts.split("¶")) || [],
       pipeLine,
     ]);
@@ -444,6 +448,59 @@ app.post("/store-data", async (req, res) => {
     });
   }
 });
+
+const response_data = {
+  __type: "MilkatMaster+MilkatMasterClass",
+  cType: false,
+  cMsg: null,
+  Msg: null,
+  Query: null,
+  NID: "5E230466-C4F6-4259-B54B-F67DCE04C10B",
+  cMilkatNos: "3.0",
+  CHouseOwnersName: "ગોબરભાઈ ઘુસાભાઈ નાકરાણી",
+  CHouseKeepersName: "2019-20",
+  cHouseKabjedarName: "",
+  NSocietyId: "13BBB413-F187-4914-8DD8-CA5EBEC4E94A",
+  cWardName: "",
+  CHouseNo: "3",
+  nLoan: "0",
+  NTypeOfBuilding: "17",
+  NHouseValue: "10000",
+  nHouseArea: "0",
+  nPipeLineID: "52",
+  CDescription: "પાકા સ્‍લેબવાળા રૂમ-1, રસોડુ, બાથરૂમ, ઢોરનું ઢાળીયુ",
+  TaxAmounts:
+    "50.00¶0.00¶0.00¶0.00¶400.00¶0.00¶10.00¶0.00¶50.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶0.00¶",
+  cNarration: "",
+  SocietyName: null,
+  nBillNo: "4",
+  nBillDate: null,
+  TaxIndex: null,
+  nMilkatID: null,
+  nReceiptID: null,
+  nTaxID: null,
+  nPaidRs: null,
+  nNetTaxPaid: null,
+  nBalancePaid: null,
+  cBojoRemarks: "",
+  dTharavDate: "",
+  cTharavNo: "",
+  cBlockNo: "",
+  cPancardNo: "",
+  cAadharcardNo: "pvbodlB08cE=",
+  cRationcardNo: "",
+  cMobileNo: "",
+  cCount: null,
+  cSocietyName: "રામ શેરી",
+  cSurveyType: "0",
+  cSurveyNo: "",
+  nSurveyNo: "",
+  cCitySurveyNo: "",
+  cCityOffice: "0",
+  cCityWard: "null",
+  cCitySheetNo: "",
+  cSurveyPanchayat: "F6122DF4-2F4B-412E-B2E9-E8E0B085B1F5",
+};
 
 // app.get("/data/:sheetId", async (req, res) => {
 //   try {

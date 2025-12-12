@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import generatePDF from "react-to-pdf";
 import "./Bill.css";
-import BASE_URL from "../config";
 import numberToGujaratiWords from "../bill/NumberToGujarati";
 import apiPath from "../isProduction";
 import { useAuth } from "../config/AuthContext";
@@ -60,9 +59,9 @@ const BillReceipt = () => {
     { id: "houseTax", name: "ઘરવેરો" },
     { id: "saPaTax", name: "સા.પાણી વેરો" },
     { id: "specialWaterTax", name: "ખા.પાણી વેરો" },
+    { id: "lightTax", name: "લાઈટવેરો" },
     { id: "cleaningTax", name: "સફાઈ વેરો" },
     { id: "sewerTax", name: "ગટર વેરો" },
-    { id: "lightTax", name: "લાઈટવેરો" },
     { id: "advance", name: "એડવાન્સ" },
     { id: "noticeFee", name: "નોટીસ" },
     { id: "otherTax", name: "અન્ય" },
@@ -116,6 +115,7 @@ const BillReceipt = () => {
       setRecordData(data?.record);
     } catch (error) {
       console.error("Error fetching data:", error);
+      window.alert("Error Tracking Your Bill!");
     }
   };
 
@@ -238,8 +238,18 @@ const BillReceipt = () => {
   }
 
   const taxes = recordData?.taxes;
-
   const totalDue = calculateTotalDue(recordData?.taxes);
+
+  function formatDate(d) {
+    return d.toLocaleDateString("en-GB"); // dd/mm/yyyy
+  }
+
+  // inside your component
+  const bill_date = new Date();
+  const due_date = new Date(bill_date);
+  due_date.setDate(due_date.getDate() + 14);
+  const y = bill_date.getFullYear();
+  const year = `${y}/${String(y + 1).slice(-2)}`;
 
   return (
     <div>
@@ -322,13 +332,13 @@ const BillReceipt = () => {
               {recordData?.bill_no || ""}
             </td>
             <td className="center" style={{ whiteSpace: "nowrap" }}>
-              {recordData?.bill_date || ""}
+              {formatDate(bill_date) || ""}
             </td>
             <td className="center" style={{ whiteSpace: "nowrap" }}>
-              {recordData?.due_date || ""}
+              {formatDate(due_date) || ""}
             </td>
             <td className="center" style={{ whiteSpace: "nowrap" }}>
-              {recordData?.year || ""}
+              {year || ""}
             </td>
           </tr>
         </table>

@@ -227,8 +227,33 @@ const Main = () => {
           {recordsToDisplay.map((item) => {
             const totalDue = calculateTotalDue(item?.taxes || []);
 
+            // 1. Construct the message
+            const billLink = `${window.location.origin}/g-bill/${workSpot?.id}/${item?.m_id}`; // Adjust based on your actual route structure
+            const ownerName = item?.owner_name || "Dear Member";
+
+            // Customize your message here. Using Gujarati as per the table headings.
+            const whatsappMessage = `નમસ્કાર ${ownerName}, તમારા મિલકતનું બિલ નીચે આપેલ લિંક પર ઉપલબ્ધ છે.
+    કુલ બાકી રકમ: ₹${totalDue.toFixed(2)}
+    બિલ જોવા માટે ક્લિક કરો: ${billLink}
+    
+    આભાર.`;
+
+            // 2. Encode the message for the URL
+            const encodedMessage = encodeURIComponent(whatsappMessage);
+
+            // 3. Construct the WhatsApp URL
+            // Use 'wa.me' for a direct link. Replace 'item?.phone' with the actual phone number.
+            // Ensure 'item?.phone' includes the country code, but without '+' or '00'.
+            const whatsappUrl = `https://wa.me/${item?.phone}?text=${encodedMessage}`;
+
             return (
-              <div key={item?.m_id} className="result-card">
+              <div
+                key={item?.m_id}
+                className="result-card"
+                style={{
+                  background: `${item?.marked ? "lightgreen" : ""}`,
+                }}
+              >
                 <div className="result-card-item">
                   <span className="result-card-label">ID:</span>
 
@@ -261,13 +286,50 @@ const Main = () => {
                   </span>
                 </div>
 
-                <a
-                  href={`bill/${item?.m_id}`}
-                  style={{ maxWidth: "fit-content" }}
-                  className="action-button"
+                <div
+                  style={{
+                    display: "flex",
+                    maxWidth: "100%",
+                    justifyContent: "center",
+                  }}
                 >
-                  View
-                </a>
+                  <a
+                    href={`bill/${item?.m_id}`}
+                    style={{ maxWidth: "fit-content", marginBottom: "0" }}
+                    className="action-button"
+                  >
+                    View
+                  </a>
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="action-button whatsapp-button" // New class for styling
+                    style={{
+                      backgroundColor: "#25D366", // WhatsApp Green
+                      color: "white",
+                      marginLeft: "8px",
+                      padding: "6px 10px",
+                      display: "flex",
+                      alignItems: "center",
+                      borderRadius: "4px",
+                      textDecoration: "none",
+                      maxWidth: "120px",
+                      textAlign: "center",
+                      marginBottom: "0",
+                    }}
+                  >
+                    <i
+                      className="fab fa-whatsapp"
+                      style={{
+                        marginRight: "5px",
+                        marginLeft: "5px",
+                        fontSize: "16px",
+                      }}
+                    ></i>
+                    Send Bill
+                  </a>
+                </div>
               </div>
             );
           })}
@@ -413,10 +475,11 @@ const Main = () => {
 
       <div className="container">
         <header className="header">
-          <h1>
-            મંગણાં નું બીલ - <span>2025-2026</span>
+          <h1 style={{ marginTop: "1rem" }}>
+            મંગણાં નું બીલ -{" "}
+            <span style={{ whiteSpace: "nowrap" }}>2025-2026</span>
           </h1>
-          <div className="location-info">
+          <div className="location-info" style={{ marginTop: "0rem" }}>
             <span>
               ગામ : <span>{workSpot?.gaam}</span>
             </span>
@@ -439,10 +502,11 @@ const Main = () => {
         <br />
 
         <div className="panel secure-search">
-          <h2>બધા બિલ શોધો</h2>
           <p>
-            **ID (ક્રમ), માલિકનું નામ,** અથવા **મોબાઈલ નં.** દાખલ કરો (બધા
-            રેકોર્ડ જોવા માટે ખાલી છોડો), અને જરૂર હોય તો સોસાયટી પસંદ કરો.
+            <b style={{ fontWeight: "600" }}>ક્રમ, માલિકનું નામ,</b> અથવા{" "}
+            <b style={{ fontWeight: "600" }}>મોબાઈલ નં.</b> દાખલ કરો (બધા
+            રેકોર્ડ જોવા માટે ખાલી છોડો), અને જરૂર હોય તો{" "}
+            <b style={{ fontWeight: "600" }}>સોસાયટી</b> પસંદ કરો.
           </p>
           <div className="filter-section">
             {/* UNIFIED INPUT FIELD */}
