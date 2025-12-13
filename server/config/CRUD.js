@@ -100,6 +100,23 @@ module.exports = class GoogleSheetService {
     });
   }
 
+  async insertBulk(sheetId, entity, rows) {
+    console.log("🔥 Bulk Insert Called");
+    await this.init();
+
+    const range = `${entity}!A1`;
+
+    return this.sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range,
+      valueInputOption: "USER_ENTERED",
+      insertDataOption: "INSERT_ROWS",
+      requestBody: {
+        values: rows,
+      },
+    });
+  }
+
   async read(sheetId, entity) {
     await this.init();
     const range = `${entity}!A1:Z9999`;

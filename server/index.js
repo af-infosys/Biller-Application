@@ -13,8 +13,10 @@ app.use(cors());
 
 const PORT = 5000;
 
-// 👇 Replace with your actual Chrome path
-const executablePath = "/usr/bin/google-chrome"; // or Windows/macOS path
+const executablePath = "/usr/bin/google-chrome";
+
+const apiPath = "https://a-f-infosys-smart-management-plxw.onrender.com";
+// const apiPath = "http://localhost:4000";
 
 app.get("/", (req, res) => {
   res.send("Hello World <a href='/fetch-data'>Get Logged In</a>");
@@ -139,6 +141,30 @@ app.post("/fetch-data", async (req, res) => {
       select.dispatchEvent(new Event("change", { bubbles: true }));
     }, moduleValue);
 
+    // extract the value from  id="txtDistrict"
+    const districtValue = await page.$eval("#txtDistrict", (el) => el.value);
+    console.log("📌 District:", districtValue);
+    const talukaValue = await page.$eval("#txtTaluka", (el) => el.value);
+    console.log("📌 Taluka:", talukaValue);
+    const villageValue = await page.$eval("#txtPanchayat", (el) => el.value);
+    console.log("📌 Village:", villageValue);
+
+    try {
+      fetch(`${apiPath}/api/bill-data/update/${login_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          district: districtValue,
+          taluka: talukaValue,
+          village: villageValue,
+        }),
+      });
+    } catch (err) {
+      console.log("❌ Error Updating Info:", err);
+    }
+
     await Promise.all([page.click('select[name="DDLUser"]')]);
     await page.evaluate((userValue) => {
       const select = document.querySelector('select[name="DDLUser"]');
@@ -232,6 +258,7 @@ app.post("/fetch-data", async (req, res) => {
         process.env.PRODUCTION == "true"
           ? "https://automation.com"
           : "http://localhost:5000";
+
       await page.evaluate(async (url) => {
         localStorage.setItem("server_url", url);
       }, server_url);
@@ -239,6 +266,9 @@ app.post("/fetch-data", async (req, res) => {
       await page.evaluate((workId) => {
         localStorage.setItem("workId", workId);
       }, workId);
+      await page.evaluate(() => {
+        window.__MILKAT_BUFFER__ = [];
+      });
       await page.addScriptTag({ path: "./override/override_bindDataTable.js" });
 
       // Starting Id
@@ -249,42 +279,55 @@ app.post("/fetch-data", async (req, res) => {
       // Ending ID / Total Milkat
       await page.type(
         'input[name="ctl00$ContentPlaceHolder1$txtnMilkatNoTo"]',
-        "10000"
+        "100000"
       );
       // Find Button
       await Promise.all([
         page.click('input[name="ctl00$ContentPlaceHolder1$BtnSave"]'),
       ]);
 
-      // https://gramsuvidha.gujarat.gov.in/PanchayatVero/MasterMilkatPV.aspx?ID=iXDufC4rzmTzyizoGMBhTZ1OqgnWEW73J2z3CJYc5CeRtH/tmnf9aA==&E=kEUY7+XbbAk=
-      const milkatId =
-        "iXDufC4rzmTzyizoGMBhTZ1OqgnWEW73J2z3CJYc5CeRtH/tmnf9aA==";
+      console.log("⏳ Waiting for all Milkat data to be collected...");
 
-      const propertyFullData = await page.evaluate(async (id) => {
-        console.log("🚨 Searched for :", id);
+      let isDone = false;
 
-        const res = await fetch("MilkatMaster.asmx/SearchMilkatMaster", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json; charset=utf-8",
-          },
-          body: JSON.stringify({ NID: id }),
-        });
+      while (!isDone) {
+        try {
+          isDone = await page.evaluate(() => {
+            return window.__MILKAT_DONE__ === true;
+          });
 
-        const json = await res.json();
-        console.log(json, json.d);
-        return json.d;
-      }, milkatId);
-      console.log("Hyjacking Completed!", propertyFullData);
+          if (!isDone) {
+            await new Promise((res) => setTimeout(res, 1000)); // 1 sec poll
+          }
+        } catch (err) {
+          console.log("Polling error, retrying...");
+          await new Promise((res) => setTimeout(res, 1000));
+        }
+      }
 
-      // const data = await page.evaluate(() => window.collectMilkatData());
-      // console.log("Collected data:", data.length);
+      await new Promise((res) => setTimeout(res, 3000));
+
+      // extract ALL data at once
+      const allData = await page.evaluate(() => {
+        return window.__MILKAT_BUFFER__;
+      });
+
+      console.log("🔥 Total records collected:", allData.length);
+      const response = await storeData(allData, workId);
+
+      if (response) {
+        if (response?.success) {
+          console.log("✅ Data Stored to Google Sheet Successfully!");
+        } else {
+          console.log("❌ Data Not Stored to Google Sheet Successfully!");
+        }
+      }
 
       console.log("✅ ==== Automation Completed ==== ✅");
 
       return res.json({
         success: true,
-        message: "Logged in successfully and navigated to Milkat Master.",
+        message: "Logged in successfully and Data Extracted!.",
       });
     } else {
       return res.status(400).json({ error: "Login failed." });
@@ -340,6 +383,88 @@ app.post("/new-work", async (req, res) => {
     });
   }
 });
+
+async function storeData(records, id) {
+  if (!Array.isArray(records) || records.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "No records received",
+    });
+  }
+
+  const sheetId = process.env.WORK_SHEET_ID;
+
+  try {
+    const rows = records.map((record) => {
+      // 🏷 category
+      let category = "";
+      switch (record?.NTypeOfBuilding) {
+        case "18":
+          category = "બિન રહેઠાણ";
+          break;
+        case "23":
+          category = "કોમન પ્લોટ";
+          break;
+        case "22":
+          category = "પ્લોટ";
+          break;
+        case "17":
+          category = "રહેઠાણ";
+          break;
+        case "20056":
+          category = "સરકારી મિલ્કત";
+          break;
+      }
+
+      // 🚰 pipeline
+      let pipeLine = "";
+      switch (record?.nPipeLineID) {
+        case "52":
+          pipeLine = "૧ લાઇન";
+          break;
+        case "51":
+          pipeLine = "૧/૨ લાઇન";
+          break;
+        case "53":
+          pipeLine = "૩/૪ લાઇન";
+          break;
+        case "50":
+          pipeLine = "નથી";
+          break;
+      }
+
+      return [
+        record?.cMilkatNos || "",
+        record?.CHouseOwnersName || "",
+        record?.cHouseKabjedarName || "",
+        record?.CHouseNo || "",
+        record?.cSocietyName || "",
+        record?.cMobileNo || "",
+        category,
+        record?.CDescription || "",
+        record?.NHouseValue || "",
+        record?.nBillNo || "",
+        record?.TaxAmounts ? JSON.stringify(record.TaxAmounts.split("¶")) : "",
+        pipeLine,
+      ];
+    });
+
+    console.log("📦 Total rows prepared:", rows.length);
+
+    const response = await sheet.insertBulk(sheetId, id, rows);
+
+    return {
+      success: true,
+      inserted: rows.length,
+    };
+  } catch (err) {
+    console.error("❌ Bulk insert failed:", err);
+    return {
+      success: false,
+      message: "Bulk insert failed",
+    };
+  }
+}
 
 app.post("/store-data", async (req, res) => {
   console.log("End Point '/store-data' is Called!");

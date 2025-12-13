@@ -81,6 +81,9 @@
       iDisplayLength: 100000,
     });
 
+    window.__MILKAT_BUFFER__ = [];
+    window.__MILKAT_DONE__ = false;
+
     oTable.on("xhr.dt", async function (e, settings, json, xhr) {
       try {
         const rows =
@@ -123,58 +126,64 @@
             }
 
             const data = await res.json();
-            console.log("Property ", data.d?.cMilkatNos, "ka data:", data.d);
 
-            const server_url = localStorage.getItem("server_url");
-
-            const storeRes = await fetch(`${server_url}/store-data`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ record: data.d }),
-            });
-            if (storeRes.status === 500) {
-              console.error("store-data failed:", storeRes);
-
-              console.error("Error:", storeRes);
-              console.log("...Trying Again for ", data.d?.cMilkatNos);
-
-              // wait for 30 second before retrying
-              await new Promise((resolve) => setTimeout(resolve, 15000));
-
-              let again = await fetch(`${server_url}/store-data`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ record: data.d }),
-              });
-
-              if (again) {
-                console.log("New Request:", again?.status);
-
-                if (again?.status === 500) {
-                  await new Promise((resolve) => setTimeout(resolve, 5000));
-                  let again2 = await fetch(`${server_url}/store-data`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ record: data.d }),
-                  });
-
-                  if (again2) {
-                    console.log("New Request:", again2?.status);
-                  }
-                }
-              }
+            if (data?.d) {
+              console.log("Property ", data.d?.cMilkatNos, "ka data:", data.d);
+              window.__MILKAT_BUFFER__.push(data.d);
             }
-            if (storeRes.status === 200) {
-              console.log("store-data success:", storeRes);
-            } else {
-              console.log("store-data failed: Another Error :", storeRes);
+
+            if (rows.length - 1 === index) {
+              window.__MILKAT_DONE__ = true;
             }
+
+            // const storeRes = await fetch(`${server_url}/store-data`, {
+            //   method: "POST",
+            //   headers: {
+            //     "Content-Type": "application/json",
+            //   },
+            //   body: JSON.stringify({ record: data.d }),
+            // });
+            // if (storeRes.status === 500) {
+            //   console.error("store-data failed:", storeRes);
+
+            //   console.error("Error:", storeRes);
+            //   console.log("...Trying Again for ", data.d?.cMilkatNos);
+
+            //   // wait for 30 second before retrying
+            //   await new Promise((resolve) => setTimeout(resolve, 15000));
+
+            //   let again = await fetch(`${server_url}/store-data`, {
+            //     method: "POST",
+            //     headers: {
+            //       "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify({ record: data.d }),
+            //   });
+
+            //   if (again) {
+            //     console.log("New Request:", again?.status);
+
+            //     if (again?.status === 500) {
+            //       await new Promise((resolve) => setTimeout(resolve, 5000));
+            //       let again2 = await fetch(`${server_url}/store-data`, {
+            //         method: "POST",
+            //         headers: {
+            //           "Content-Type": "application/json",
+            //         },
+            //         body: JSON.stringify({ record: data.d }),
+            //       });
+
+            //       if (again2) {
+            //         console.log("New Request:", again2?.status);
+            //       }
+            //     }
+            //   }
+            // }
+            // if (storeRes.status === 200) {
+            //   console.log("store-data success:", storeRes);
+            // } else {
+            //   console.log("store-data failed: Another Error :", storeRes);
+            // }
           }
 
           console.log("Custom!! All Data forwarded successfully.");
