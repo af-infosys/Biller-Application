@@ -2,48 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import generatePDF from "react-to-pdf";
 import "./Bill.css";
-import numberToGujaratiWords from "../bill/NumberToGujarati";
 import apiPath from "../isProduction";
 import { useAuth } from "../config/AuthContext";
-
-// --- Configuration ---
-const SHEET_ID = "1_bs5IQ0kDT_xVLwJdihe17yuyY_UfJRKCtwoGvO7T5Y";
-const PAYEE_UPI_ID = "kiritporiya25-2@oksbi";
-const PAYEE_NAME = "Meghraj Gram Panchayat";
-const STATIC_DATA = {
-  village: "MEGHARAJ",
-  taluka: "MEGHARAJ",
-  district: "ARAVALLI",
-};
-
-const safeNumber = (val) => {
-  const num = parseFloat(val);
-  return isNaN(num) ? 0 : num;
-};
-
-// Helper to format date if needed (handling Google Sheet Date serialization)
-const formatSheetDate = (dateValue) => {
-  if (!dateValue || typeof dateValue !== "string") return dateValue;
-  // This is a complex logic based on how Google Sheets serializes dates via Gviz.
-  // It's often safer to display the raw string unless the format is guaranteed.
-  if (dateValue.startsWith("Date(")) {
-    try {
-      const parts = dateValue
-        .replace("Date(", "")
-        .replace(")", "")
-        .split(",")
-        .map(Number);
-      const year = parts[0];
-      const month = String(parts[1] + 1).padStart(2, "0"); // 0-based → 1-based
-      const day = String(parts[2]).padStart(2, "0");
-      return `${day}/${month}/${year}`;
-    } catch (e) {
-      console.error("Failed to parse sheet date:", e);
-      return dateValue;
-    }
-  }
-  return dateValue;
-};
+import RenderBill from "./RenderBill";
 
 // --- The Main React Component ---
 const BillReceipt = () => {
@@ -53,23 +14,6 @@ const BillReceipt = () => {
   // Refs for PDF generation and QR Code container
   const pdfContentRef = useRef(null);
   const qrCodeRef = useRef(null);
-
-  // Define the tax fields for calculation and rendering
-  const taxFields = [
-    { id: "houseTax", name: "ઘરવેરો" },
-    { id: "saPaTax", name: "સા.પાણી વેરો" },
-    { id: "specialWaterTax", name: "ખા.પાણી વેરો" },
-    { id: "lightTax", name: "લાઈટવેરો" },
-    { id: "cleaningTax", name: "સફાઈ વેરો" },
-    { id: "sewerTax", name: "ગટર વેરો" },
-    { id: "advance", name: "એડવાન્સ" },
-    { id: "noticeFee", name: "નોટીસ" },
-    { id: "otherTax", name: "અન્ય" },
-    { id: "otherTax2", name: "અન્ય૨" },
-    { id: "otherTax3", name: "અન્ય૩" },
-    { id: "otherTax4", name: "અન્ય૪" },
-    { id: "otherTax5", name: "અન્ય૫" },
-  ];
 
   // --- Data Fetching Logic (useEffect) ---
   const { id } = useParams();
@@ -146,41 +90,6 @@ const BillReceipt = () => {
     }
   };
 
-  const calculateTotalDue = (taxesArray) => {
-    if (!Array.isArray(taxesArray)) return 0;
-    let totalDue = taxesArray.reduce((sum, val) => sum + safeNumber(val), 0);
-    return totalDue;
-  };
-
-  const generateQRCode = (totalAmount, milkatId) => {
-    if (typeof window.QRCode === "undefined" || !qrCodeRef.current) return;
-
-    const container = qrCodeRef.current;
-    container.innerHTML = ""; // Clear existing QR code
-
-    if (totalAmount <= 0) {
-      container.innerHTML = "<p>No payment due. (બાકી ચુકવણી નથી)</p>";
-      return;
-    }
-
-    const transactionNote = `Property Tax for Milkat ID ${milkatId}`;
-    const encodedPayeeName = encodeURIComponent(PAYEE_NAME);
-    const encodedTransactionNote = encodeURIComponent(transactionNote);
-
-    const upiLink = `upi://pay?pa=${PAYEE_UPI_ID}&pn=${encodedPayeeName}&am=${totalAmount.toFixed(
-      2
-    )}&cu=INR&tn=${encodedTransactionNote}`;
-
-    new window.QRCode(container, {
-      text: upiLink,
-      width: 300,
-      height: 300,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: window.QRCode.CorrectLevel.M,
-    });
-  };
-
   // --- Handlers for Buttons ---
   const printReceipt = () => {
     updateMark();
@@ -237,20 +146,6 @@ const BillReceipt = () => {
     );
   }
 
-  const taxes = recordData?.taxes;
-  const totalDue = calculateTotalDue(recordData?.taxes);
-
-  function formatDate(d) {
-    return d.toLocaleDateString("en-GB"); // dd/mm/yyyy
-  }
-
-  // inside your component
-  const bill_date = new Date();
-  const due_date = new Date(bill_date);
-  due_date.setDate(due_date.getDate() + 14);
-  const y = bill_date.getFullYear();
-  const year = `${y}/${String(y + 1).slice(-2)}`;
-
   return (
     <div>
       <div className="action-buttons">
@@ -265,223 +160,13 @@ const BillReceipt = () => {
         </button>
       </div>
 
-      <div id="pdf-content" className="pdf-container" ref={pdfContentRef}>
-        <table>
-          <tr style={{ position: "relative" }}>
-            <th colspan="6" className="bold">
-              <span className="bold village-name">{STATIC_DATA.village}</span>{" "}
-              ગ્રામપંચાયત <br />
-              <p style={{ fontSize: "1.5rem" }}>
-                મુ.<span className="bold">{STATIC_DATA.village}</span> તા.
-                <span className="bold">{STATIC_DATA.taluka}</span> જિ.
-                <span className="bold">{STATIC_DATA.district}</span>
-              </p>
-              <h2>મંગણાં નું બીલ</h2>
-              <p style={{ fontSize: "1.5rem" }}>
-                (ગ્રામ પંચાયત એક્ટની કલમ ૨૧૫(૧) મુજબ) <br /> આ બિલની રકમ ૧૫ દિવસ
-                માં અચૂક જમા કરાવવી
-              </p>
-              <h3
-                style={{
-                  position: "absolute",
-                  top: ".3rem",
-                  right: ".3rem",
-                  fontSize: "1.3rem",
-                }}
-              >
-                *ગ્રાહક કોપી*
-              </h3>
-            </th>
-          </tr>
-
-          <tr>
-            <td className="left" colspan="6">
-              <span>શ્રીમાન /શ્રીમતી :</span>
-              <span className="bold">{recordData?.owner_name}</span>
-            </td>
-          </tr>
-          <tr>
-            <td className="left" colspan="6">
-              <span>કબ્જેદાર :</span>
-              <span className="bold">{recordData?.other_name}</span>
-            </td>
-          </tr>
-          <tr>
-            <td className="left" colspan="6">
-              <span>સરનામું :</span>
-              <span className="bold">{recordData?.society}</span>
-            </td>
-          </tr>
-
-          <tr>
-            <th className="bold weak center">મિલકત નંબર</th>
-            <th className="bold weak center">જૂનો મિલકત નં.</th>
-            <th className="bold weak center">બિલ નંબર</th>
-            <th className="bold weak center">બિલની તારીખ</th>
-            <th className="bold weak center">છેલ્લી તારીખ</th>
-            <th className="bold weak center">મુદત વર્ષ </th>
-          </tr>
-          <tr>
-            <td className="center" style={{ whiteSpace: "nowrap" }}>
-              {recordData?.m_id || ""}
-            </td>
-            <td className="center" style={{ whiteSpace: "nowrap" }}>
-              {recordData?.old_id || ""}
-            </td>
-            <td className="center" style={{ whiteSpace: "nowrap" }}>
-              {recordData?.bill_no || ""}
-            </td>
-            <td className="center" style={{ whiteSpace: "nowrap" }}>
-              {formatDate(bill_date) || ""}
-            </td>
-            <td className="center" style={{ whiteSpace: "nowrap" }}>
-              {formatDate(due_date) || ""}
-            </td>
-            <td className="center" style={{ whiteSpace: "nowrap" }}>
-              {year || ""}
-            </td>
-          </tr>
-        </table>
-
-        <table>
-          <tr className="background">
-            <th
-              rowspan="2"
-              className="background"
-              style={{ fontSize: "1.4rem" }}
-            >
-              વેરા કે બીજી લેણી રકમ ની વિગત
-            </th>
-            <th colspan="4" style={{ fontSize: "1.4rem" }}>
-              વેરાની સંપૂર્ણ વિગત નીચે પ્રમાણે છે.
-            </th>
-            <th rowSpan="2" style={{ fontSize: "1.4rem" }}>
-              મંગણાંની રકમ ભરવામાં કસર કરતાં હોય તે વિગત
-            </th>
-          </tr>
-
-          <tr>
-            <th className="background" style={{ fontSize: "1.4rem" }}>
-              વેરાનો દર
-            </th>
-            <th className="background" style={{ fontSize: "1.4rem" }}>
-              ચા.બાકી
-            </th>
-            <th className="background" style={{ fontSize: "1.4rem" }}>
-              પા.બાકી
-            </th>
-            <th className="background" style={{ fontSize: "1.4rem" }}>
-              કુલ
-            </th>
-          </tr>
-
-          {taxFields.map((field, index) => {
-            const startIndex = index * 2;
-            const left = Number(taxes[startIndex] || 0);
-            const right = Number(taxes[startIndex + 1] || 0);
-
-            return (
-              <tr key={field.id} className="right">
-                <td>{field.name}</td>
-                <td></td>
-                <td>{left.toFixed(2)}</td>
-                <td>{right.toFixed(2)}</td>
-                <td>{(left + right).toFixed(2)}</td>
-                <td></td>
-              </tr>
-            );
-          })}
-
-          <tr className="background">
-            <th className="bold">કુલ</th>
-            <td></td>
-            <th className="bold right">
-              {Number(taxes[0]) +
-                Number(taxes[2]) +
-                Number(taxes[4]) +
-                Number(taxes[6]) +
-                Number(taxes[8]) +
-                Number(taxes[10]) +
-                Number(taxes[12]) +
-                Number(taxes[14]) +
-                Number(taxes[16]) +
-                Number(taxes[18]) +
-                Number(taxes[20]) +
-                Number(taxes[22]) +
-                Number(taxes[24])}
-            </th>
-            <th className="bold right">
-              {Number(taxes[1]) +
-                Number(taxes[3]) +
-                Number(taxes[5]) +
-                Number(taxes[7]) +
-                Number(taxes[9]) +
-                Number(taxes[11]) +
-                Number(taxes[13]) +
-                Number(taxes[15]) +
-                Number(taxes[17]) +
-                Number(taxes[19]) +
-                Number(taxes[21]) +
-                Number(taxes[23]) +
-                Number(taxes[25])}
-            </th>
-            <th className="bold right">{totalDue}</th>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td colspan="6">
-              કુલ રૂપિયા શબ્દોમાં :{" "}
-              <span className="bold">{numberToGujaratiWords(totalDue)}</span>
-            </td>
-          </tr>
-        </table>
-
-        <div
-          style={{
-            border: "2px solid black",
-            padding: "10px",
-            fontFamily: "'Noto Sans Gujarati', 'Shruti', sans-serif",
-            fontSize: "18px",
-            lineHeight: 1.8,
-          }}
-        >
-          ઉપરની જણાવેલ રકમ તમારી પાસે પંચાયતની લેણી નીકળે છે અને તેથી તમને જાણ
-          કરવાની કે જે લેણી રકમ નીકળે છે તે રકમ બિલ મળેથી દિવસ પંદર ની અંદર
-          પંચાયતની ઓફિસે આવી ભરી જવી.
-          <br />
-          જો ઉપર જણાવેલ રકમ પંચાયતને જણાવેલ મુદતમાં ભરપાઈ કરશો નહિ તો વસુલાતની
-          માંગણી માટેની નોટિસ પંચાયતના એક્ટ ૧૯૯૩ ની કલમ ૨૧૫(૧) મુજબ તમારી ઉપર
-          બજાવવામાં આવશે અને જે ઉપરથી તમે પંચાયતને ઉપરની રકમ ભરી ન જવા બદલ
-          જવાબદાર ગણાશે તે જાણશો.
-          <br />
-        </div>
-
-        <table>
-          <tr>
-            <td>
-              <p style={{ whiteSpace: "nowrap", fontSize: "1.55rem" }}>
-                સ્થળ :
-                <span className="bold village-name">{STATIC_DATA.village}</span>{" "}
-                ગ્રામપંચાયત
-              </p>
-
-              <hr />
-              <p style={{ fontSize: "1rem", margin: "5px" }}>
-                by- A.F. Infosys - 93764 43146
-              </p>
-            </td>
-
-            <td style={{ fontSize: "1.6rem" }}>
-              સરપંચ
-              <br />
-              <p style={{ whiteSpace: "nowrap" }}>
-                <span className="bold village-name">{STATIC_DATA.village}</span>{" "}
-                ગ્રામપંચાયત
-              </p>
-            </td>
-          </tr>
-        </table>
+      <div
+        id="pdf-content"
+        className="pdf-container"
+        ref={pdfContentRef}
+        style={{ width: "700px" }}
+      >
+        <RenderBill workSpot={workSpot} recordData={recordData} />
       </div>
     </div>
   );

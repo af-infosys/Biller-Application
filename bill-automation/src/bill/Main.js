@@ -54,7 +54,6 @@ const Main = () => {
         );
 
         const data = await response.json();
-        console.log("Assigned Work", data);
 
         setWorkSpot(data?.work);
         // Once workSpot is set, fetchDataFromSheet will be called by its useEffect
@@ -84,7 +83,6 @@ const Main = () => {
 
       const data = await result.json();
       const records = data?.data || [];
-      console.log("Asli data", records);
 
       // 1. Set all records
       setAllRecords(records);
@@ -441,7 +439,6 @@ const Main = () => {
       });
 
       const result = await response.json();
-      console.log(result);
       // Re-fetch sheet data after portal update
       fetchDataFromSheet(workSpot.id);
     } catch (err) {
