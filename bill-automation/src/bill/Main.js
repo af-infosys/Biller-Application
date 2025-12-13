@@ -420,32 +420,6 @@ const Main = () => {
     }
   };
 
-  // --- External Data Fetching (Kept as is, but added checks) ---
-  const fetchDataFromPortal = async () => {
-    try {
-      const login_id = workSpot?.id;
-      const password = workSpot?.password;
-
-      if (!login_id || !password) {
-        window.alert("Login first (Work Assignment not found).");
-        return;
-      }
-
-      // Body data : id, password
-      const response = await fetch(`${BASE_URL}/fetch-data`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ login_id, password }),
-      });
-
-      const result = await response.json();
-      // Re-fetch sheet data after portal update
-      fetchDataFromSheet(workSpot.id);
-    } catch (err) {
-      console.log("Automation Failed", err);
-    }
-  };
-
   if (workSpot?.notassigned) {
     return (
       <div>
@@ -539,7 +513,22 @@ const Main = () => {
               onClick={handleSecureSearch}
               className="action-button"
               disabled={isLoading}
+              style={{ display: "flex" }}
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
               બિલ શોધો
             </button>
           </div>

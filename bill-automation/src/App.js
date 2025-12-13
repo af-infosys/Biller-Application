@@ -34,7 +34,7 @@ function App() {
             <Route path="bill/:id" element={<Bill />} />
           </Route>
 
-          <Route path="/general/:sheetid/:mid" element={<GeneralList />} />
+          <Route path="/general/:sheetId" element={<GeneralList />} />
           <Route path="/g-bill/:sheetId/:id" element={<GeneralBill />} />
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<h1>404: Page Not Found</h1>} />

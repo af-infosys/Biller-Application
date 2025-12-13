@@ -1,132 +1,145 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-// import "./Bill.css";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import apiPath from "../isProduction";
+// Note: आपको 'Bill.css' की आवश्यकता होगी, लेकिन मैंने इसे comments में रखा है।
 
-// Helper function to safely parse a value as a number
-const safeNumber = (val) => {
-  const num = parseFloat(val);
-  return isNaN(num) ? 0 : num;
-};
+// API Call Mock/Placeholder (इसे आपके वास्तविक API endpoint से बदलें)
+const fetchPropertyData = async (sheetId, searchData) => {
+  const response = await fetch(
+    `${await apiPath()}/api/bill-data/public/${sheetId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(searchData),
+    }
+  );
 
-// Calculates the total due amount from the record row (columns 19 to 30)
-const calculateTotalDue = (row) => {
-  let totalDue = 0;
-  // Columns 19 to 30 (12 columns)
-  for (let i = 19; i <= 30; i++) {
-    totalDue += safeNumber(row[i]);
+  if (!response.ok) {
+    throw new Error("Server error");
   }
-  return totalDue;
+
+  return response.json();
 };
 
 const GeneralList = () => {
-  const [allRecords, setAllRecords] = useState([]);
-  const [societyNames, setSocietyNames] = useState([]);
-  const [filteredRecords, setFilteredRecords] = useState(null); // null means no search yet, [] means search done but no results
+  const { sheetId } = useParams();
+  const navigation = useNavigate();
+
+  const [propertyData, setPropertyData] = useState(null); // Single property object
   const [isLoading, setIsLoading] = useState(false);
   const [searchName, setSearchName] = useState("");
   const [searchMobile, setSearchMobile] = useState("");
-  const [selectedSociety, setSelectedSociety] = useState("");
+  const [searchSociety, setSearchSociety] = useState(""); // Corrected name for consistency
+  const [message, setMessage] = useState(
+    "કૃપા કરીને તમારી પ્રોપર્ટી શોધવા માટે વિગતો દાખલ કરો."
+  );
   const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
 
-  // --- Data Fetching and Initialization ---
+  const [societyNames, setSocietyNames] = useState(["Loading..."]);
+  const [workSpot, setWorkSpot] = useState({});
 
-  const fetchDataFromSheet = async (sheetId) => {
-    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-    const res = await fetch(url);
-    const text = await res.text();
-    // The sheet response format requires slicing
-    const json = JSON.parse(text.substring(47).slice(0, -2));
-    const rows = json.table.rows.map((row) =>
-      row.c.map((cell) => (cell ? cell.v : ""))
-    );
-    // Attach originalIndex for record identification and filtering
-    return rows.map((r, i) => ({ record: r, originalIndex: i }));
+  // New fetch function for society list
+  const fetchSocietyList = async () => {
+    // Note: API endpoint को अपने real endpoint से बदलें
+    const apiUrl = `${await apiPath()}/api/bill-data/society/${sheetId}`;
+
+    try {
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error("Failed to fetch society list");
+
+      const result = await response.json();
+
+      if (result.success && Array.isArray(result.data)) {
+        setSocietyNames(result.data);
+      } else {
+        console.error("API returned success: false or invalid data format.");
+      }
+    } catch (error) {
+      console.error("Error fetching society list:", error);
+    }
   };
 
+  const fetchBillWorkDetails = async () => {
+    try {
+      const response = await fetch(
+        `${await apiPath()}/api/work/bill-details/${sheetId}`
+      );
+
+      const data = await response.json();
+
+      setWorkSpot(data?.work);
+    } catch (err) {
+      window.alert("Error Tracking Bill Details!");
+      console.error(err);
+    }
+  };
+
+  // --- useEffect Hook to fetch society list on component mount ---
   useEffect(() => {
-    const init = async () => {
-      setIsLoading(true);
-      try {
-        const records = await fetchDataFromSheet(
-          "1_bs5IQ0kDT_xVLwJdihe17yuyY_UfJRKCtwoGvO7T5Y"
-        );
-        setAllRecords(records);
+    // sheetId के उपलब्ध होने पर ही fetch करें
+    if (sheetId) {
+      fetchSocietyList();
+      fetchBillWorkDetails();
+    }
+  }, [sheetId]);
 
-        // Populate society names (skip header row at index 0)
-        const names = new Set();
-        for (let i = 1; i < records.length; i++) {
-          if (records[i].record[4]) names.add(records[i].record[4]);
-        }
-        setSocietyNames(Array.from(names).sort()); // Sort for better UX
-      } catch (err) {
-        alert("ડેટા લોડ કરવામાં ક્ષમતા નિષ્ફળ ગઈ. કૃપા કરીને ફરી પ્રયાસ કરો.");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    init();
-  }, []);
-
-  // --- Filtering Logic ---
-
-  const handleSecureSearch = () => {
-    const nameInput = searchName.trim().toLowerCase();
+  const handleSecureSearch = async () => {
+    const nameInput = searchName.trim();
     const mobileInput = searchMobile.trim();
-    const societyFilter = selectedSociety.trim().toLowerCase();
+    const societyInput = searchSociety.trim();
 
-    // Validation
-    if (!nameInput && !mobileInput) {
-      alert("માલિકનું નામ અથવા મોબાઈલ નં. દાખલ કરો.");
+    // Reset previous state
+    setPropertyData(null);
+    setMessage("");
+
+    // Basic Validation
+    if (!nameInput && !mobileInput && !societyInput) {
+      setMessage(
+        "કૃપા કરીને તમારી પ્રોપર્ટી શોધવા માટે નામ, ફોન નં. અથવા સોસાયટીમાં થી કોઈ એક વિગત દાખલ કરો."
+      );
       return;
     }
-    if (nameInput && nameInput.length < 3) {
-      alert("માલિકનું નામ ઓછામાં ઓછા 3 અક્ષરનું હોવું જોઈએ.");
-      return;
-    }
+
     if (mobileInput && mobileInput.length !== 10) {
-      alert("મોબાઈલ નંબર 10 અંકનો હોવો જોઈએ.");
+      setMessage("મોબાઇલ નંબર 10 અંકનો હોવો જોઈએ.");
       return;
     }
 
-    const filtered = allRecords.filter((item) => {
-      if (item.originalIndex === 0) return false; // Skip header row
+    // Name validation is flexible, backend will handle strictness.
 
-      const row = item.record;
-      const ownerName = row[1]?.toLowerCase() || "";
-      const mobile = row[17]?.toString() || "";
-      const society = row[4]?.toLowerCase() || "";
+    setIsLoading(true);
+    try {
+      const searchPayload = {
+        owner_name: nameInput || undefined, // Send undefined if empty
+        phone: mobileInput || undefined,
+        society: societyInput || undefined,
+      };
 
-      let nameMatch = false;
-      if (nameInput) {
-        // First, try exact match for the whole name string
-        if (ownerName === nameInput) {
-          nameMatch = true;
-        } else {
-          // Fallback to flexible word-based match
-          const searchWords = nameInput.split(/\s+/).filter(Boolean);
-          const ownerNameWords = ownerName.split(/\s+/).filter(Boolean);
-          // All search words must be present in the owner name words
-          nameMatch = searchWords.every((word) =>
-            ownerNameWords.includes(word)
-          );
-        }
+      const result = await fetchPropertyData(sheetId, searchPayload);
+
+      setMessage(result.message);
+
+      if (result.success) {
+        // Backend sends the single object if success is true
+        setPropertyData(result.data);
+      } else {
+        setPropertyData(null); // Ensure no data is displayed on failure
       }
-
-      const mobileMatch = mobileInput && mobile.includes(mobileInput);
-      const societyMatch = !societyFilter || society === societyFilter;
-
-      return (nameMatch || mobileMatch) && societyMatch;
-    });
-
-    setFilteredRecords(filtered);
+    } catch (error) {
+      console.error("Search Error:", error);
+      setMessage("ડેટા લાવતી વખતે ભૂલ આવી. કૃપા કરીને ફરી પ્રયાસ કરો.");
+      setPropertyData(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // --- Window Resize/Responsiveness Logic ---
 
   const handleResize = useCallback(() => {
     setIsMobileView(window.innerWidth <= 768);
-    // Note: React will automatically re-render the results when isMobileView changes
-    // which effectively handles the original requirement of re-rendering on resize.
   }, []);
 
   useEffect(() => {
@@ -136,100 +149,153 @@ const GeneralList = () => {
     };
   }, [handleResize]);
 
-  // --- Rendering Components ---
-
-  const renderNoResults = () => {
-    if (filteredRecords === null) return null;
-    if (filteredRecords.length === 0) {
-      return <div className="no-records-found">તમારું રેકોર્ડ મળ્યું નથી.</div>;
-    }
-    return null;
+  const safeNumber = (val) => {
+    const num = parseFloat(val);
+    return isNaN(num) ? 0 : num;
   };
 
-  const renderResults = () => {
-    if (!filteredRecords || filteredRecords.length === 0) return null;
+  const calculateTotalDue = (taxesArray) => {
+    if (!Array.isArray(taxesArray)) return 0;
+    let totalDue = taxesArray.reduce((sum, val) => sum + safeNumber(val), 0);
+    return totalDue;
+  };
 
-    if (isMobileView) {
-      // Card View for Mobile
-      return (
-        <div className="results-container">
-          {filteredRecords.map((item) => {
-            const row = item.record;
-            const totalDue = calculateTotalDue(row);
-            return (
-              <div key={item.originalIndex} className="result-card">
-                <div className="result-card-item">
-                  <span className="result-card-label">માલિકનું નામ:</span>
-                  <span className="result-card-value">{row[1]}</span>
-                </div>
-                <div className="result-card-item">
-                  <span className="result-card-label">સોસાયટી:</span>
-                  <span className="result-card-value">{row[4]}</span>
-                </div>
-                <div className="result-card-item">
-                  <span className="result-card-label">મોબાઈલ:</span>
-                  <span className="result-card-value">{row[17]}</span>
-                </div>
-                <div className="result-card-item">
-                  <span className="result-card-label">કુલ બાકી:</span>
-                  <span className="result-card-value">
-                    ₹{totalDue.toFixed(2)}
-                  </span>
-                </div>
-                <a
-                  href="#"
-                  style={{ maxWidth: "fit-content" }}
-                  className="action-button"
-                >
-                  Pay
-                </a>
-              </div>
-            );
-          })}
+  const renderPropertyDetails = () => {
+    if (!propertyData) return null;
+
+    const {
+      m_id,
+      owner_name,
+      society,
+      phone,
+      taxes,
+      house_id,
+      description,
+      price, // Base property price/value
+    } = propertyData;
+
+    const totalTaxDue = calculateTotalDue(taxes);
+
+    return (
+      <div className="property-details-panel">
+        <h2>તમારી પ્રોપર્ટીની વિગતો</h2>
+        {/* WARNING MESSAGE */}
+        {/* <p className="privacy-warning">
+          ⚠️ *ચેતવણી:* આ માત્ર તમારી પોતાની પ્રોપર્ટીનો ડેટા છે. 
+        </p> */}
+
+        <div className="details-grid">
+          <div className="detail-item">
+            <span className="label">માલિકનું નામ:</span>
+            <span className="value">{owner_name}</span>
+          </div>
+          <div className="detail-item">
+            <span className="label">સોસાયટી:</span>
+            <span className="value">{society}</span>
+          </div>
+          {/* <div className="detail-item">
+            <span className="label">હાઉસ ID / નંબર:</span>
+            <span className="value">{house_id}</span>
+          </div> */}
+          <div className="detail-item">
+            <span className="label">ફોન નં:</span>
+            <span className="value">{phone}</span>
+          </div>
+          <div className="detail-item full-width">
+            <span className="label">વર્ણન:</span>
+            <span className="value">{description}</span>
+          </div>
+          <div className="detail-item highlight">
+            <span className="label">કુલ ટેક્સ બાકી:</span>
+            <span className="value">₹{totalTaxDue.toFixed(2)}</span>
+          </div>
+          <div className="detail-item">
+            <span className="label">આકારણી મૂલ્ય:</span>
+            <span className="value">₹{price.toFixed(2)}</span>
+          </div>
         </div>
-      );
-    } else {
-      // Table View for Desktop
-      return (
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>માલિકનું નામ</th>
-                <th>સોસાયટી</th>
-                <th>મોબાઈલ</th>
-                <th>કુલ બાકી</th>
-                <th>Receipt</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRecords.map((item) => {
-                const row = item.record;
-                const totalDue = calculateTotalDue(row);
-                return (
-                  <tr key={item.originalIndex}>
-                    <td>{row[1]}</td>
-                    <td>{row[4]}</td>
-                    <td>{row[17]}</td>
-                    <td>₹{totalDue.toFixed(2)}</td>
-                    <td>
-                      <a href="#" className="action-button">
-                        Pay
-                      </a>
-                    </td>
+
+        {/* Tax Details Table */}
+        {taxes?.length > 0 && (
+          <>
+            <h3>ટેક્સ વિગતો</h3>
+            <div className="table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>ટેક્સનું નામ</th>
+                    <th>બાકી રકમ</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
+                </thead>
+                <tbody>
+                  {taxes.map((tax, index) => (
+                    <tr key={index}>
+                      <td>{tax.name || `Tax Item ${index + 1}`}</td>
+                      <td>₹{parseFloat(tax.price || 0).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {/* Action Button */}
+        <button
+          className="action-button primary-action"
+          onClick={() => {
+            navigation(`/g-bill/${sheetId}/${m_id}`);
+          }}
+        >
+          બિલ ડાઉનલોડ કરો
+        </button>
+      </div>
+    );
   };
+
+  // --- Main Render ---
 
   return (
-    <div>
-      {/* Loading Overlay controlled by state */}
+    <div className="general-list-app">
+      {/* Basic Styles for clarity (You should move this to a CSS file) */}
+      <style>{`
+        .general-list-app { font-family: Arial, sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 0px; border-bottom: 2px solid #ccc; padding-bottom: 15px; }
+        .header h1, .header h3 { color: #333; }
+        .panel { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .filter-section { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-input-group, .filter-dropdown-group { flex: 1; min-width: 200px; }
+        .filter-input, .filter-dropdown { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .action-button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        .action-button:hover:not(:disabled) { background-color: #0056b3; }
+        .action-button:disabled { background-color: #a0a0a0; cursor: not-allowed; }
+        .message-box { padding: 15px; border-radius: 4px; margin-bottom: 20px; font-weight: bold; }
+        .message-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message-error, .privacy-warning { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .loading-overlay.visible { display: flex; }
+        .spinner { border: 4px solid rgba(0,0,0,0.1); border-top: 4px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .property-details-panel { background: #e9f5ff; padding: 25px; border-radius: 10px; border: 1px solid #007bff; }
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .detail-item { padding: 10px; border-bottom: 1px dashed #ccc; }
+        .detail-item .label { font-weight: bold; display: block; color: #555; }
+        .detail-item .value { display: block; font-size: 1.1em; color: #000; }
+        .detail-item.full-width { grid-column: 1 / -1; }
+        .detail-item.highlight { background-color: #d3eaff; border-radius: 4px; border-bottom: none; }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .data-table th, .data-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .data-table th { background-color: #f2f2f2; }
+        .primary-action { display: block; width: 100%; margin-top: 20px; font-size: 1.1em; }
+
+        @media (max-width: 768px) {
+            .filter-section { display: block; }
+            .filter-input-group, .filter-dropdown-group { min-width: 100%; margin-bottom: 10px; }
+            .details-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      {/* Loading Overlay */}
       <div className={`loading-overlay ${isLoading ? "visible" : "hidden"}`}>
         <div className="spinner"></div>
       </div>
@@ -237,57 +303,51 @@ const GeneralList = () => {
       <div className="container">
         <header className="header">
           <h1>A.F. Infosys</h1>
-          <h1>
-            મિલ્ક્ત આકારણીની યાદી - વર્ષ : <span>2025-2026</span>
-          </h1>
+          <h2>મિલ્ક્ત આકારણીની યાદી</h2>
           <h3>
-            ગામ : <span>MEGHARAJ</span>
-            <br />
-            તાલકો : <span>MEGHARAJ</span>
-            <br />
-            જીલ્લો : <span>ARAVALLI</span>
+            <b style={{ whiteSpace: "nowrap" }}>ગામ : {workSpot?.gaam}</b>{" "}
+            <b style={{ whiteSpace: "nowrap" }}>તાલુકો : {workSpot?.taluko}</b>{" "}
+            <b style={{ whiteSpace: "nowrap" }}>
+              જીલ્લો : {workSpot?.district}
+            </b>
           </h3>
         </header>
 
         <div className="panel secure-search">
-          <h2>તમારું બિલ શોધો</h2>
-          <p>
-            માલિકનું નામ અથવા મોબાઈલ નં. દાખલ કરો (બેમાંથી એક ફરજિયાત), અને જરૂર
-            હોય તો સોસાયટી પસંદ કરો.
-          </p>
+          <h2>તમારી પ્રોપર્ટી શોધો</h2>
           <div className="filter-section">
             <div className="filter-input-group">
+              <label htmlFor="searchName">માલિકનું નામ</label>
               <input
                 type="text"
                 id="searchName"
                 placeholder="માલિકનું નામ..."
                 className="filter-input"
-                minLength="3"
                 value={searchName}
                 onChange={(e) => setSearchName(e.target.value)}
               />
             </div>
             <div className="filter-input-group">
+              <label htmlFor="searchMobile">મોબાઈલ નં. (10 અંક)</label>
               <input
                 type="text"
                 id="searchMobile"
                 placeholder="મોબાઈલ નં..."
                 className="filter-input"
-                minLength="10"
                 maxLength="10"
                 value={searchMobile}
                 onChange={(e) => setSearchMobile(e.target.value)}
               />
             </div>
             <div className="filter-dropdown-group">
+              <label htmlFor="societyFilter">સોસાયટી પસંદ કરો (વૈકલ્પિક)</label>
               <select
                 id="societyFilter"
                 className="filter-dropdown"
-                value={selectedSociety}
-                onChange={(e) => setSelectedSociety(e.target.value)}
+                value={searchSociety}
+                onChange={(e) => setSearchSociety(e.target.value)}
               >
-                <option value="">(Optional) સોસાયટી પસંદ કરો</option>
-                {/* Dynamically populate options from state */}
+                <option value="">બધી સોસાયટીઓ</option>
                 {societyNames.map((name) => (
                   <option key={name} value={name}>
                     {name}
@@ -299,14 +359,40 @@ const GeneralList = () => {
               onClick={handleSecureSearch}
               className="action-button"
               disabled={isLoading}
+              style={{ display: "flex" }}
             >
-              બિલ શોધો
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              પ્રોપર્ટી શોધો
             </button>
           </div>
         </div>
 
-        {renderNoResults()}
-        {renderResults()}
+        {/* Message Box */}
+        {message && (
+          <div
+            className={`message-box ${
+              propertyData ? "message-success" : "message-error"
+            }`}
+          >
+            {message}
+          </div>
+        )}
+
+        {/* Display Property Details */}
+        {renderPropertyDetails()}
       </div>
     </div>
   );
