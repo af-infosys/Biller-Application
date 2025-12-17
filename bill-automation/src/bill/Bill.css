@@ -6,20 +6,16 @@
   font-weight: 500;
 }
 
-/* Add this to your existing <style> block */
 @media print {
-  /* Hide everything on the page */
   body * {
     visibility: hidden;
   }
 
-  /* Make the receipt container and everything inside it visible */
   #pdf-content,
   #pdf-content * {
     visibility: visible;
   }
 
-  /* Position the receipt container to fill the print page */
   #pdf-content {
     position: absolute;
     left: 0;
@@ -28,10 +24,9 @@
     margin: 0;
     padding-inline: 1rem;
     padding: 0;
-    box-shadow: none; /* Remove shadow for printing */
+    box-shadow: none;
   }
 
-  /* Optional: Control print margins */
   @page {
     margin: 0.5in;
   }

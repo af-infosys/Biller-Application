@@ -112,7 +112,7 @@ const BillReceipt = () => {
       filename: `Receipt_${recordData?.m_id}.pdf`,
       page: {
         margin: 3,
-        format: [195, 480],
+        format: [195, 490],
         orientation: "portrait",
       },
       canvas: {
