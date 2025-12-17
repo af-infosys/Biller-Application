@@ -39,7 +39,7 @@ export default function RenderBill({ workSpot, recordData }) {
   // inside your component
   const bill_date = new Date();
   const due_date = new Date(bill_date);
-  due_date.setDate(due_date.getDate() + 14);
+  due_date.setDate(due_date.getDate() + 15);
   const y = bill_date.getFullYear();
   const year = `${y}/${String(y + 1).slice(-2)}`;
 
@@ -55,7 +55,7 @@ export default function RenderBill({ workSpot, recordData }) {
       <table style={{ width: "100%" }}>
         <thead>
           <tr style={{ position: "relative" }}>
-            <th colSpan="6" className="bold">
+            <th colSpan="6" className="bold" style={{ paddingTop: "20px" }}>
               <span className="bold village-name">{workSpot?.gaam}</span>{" "}
               ગ્રામપંચાયત <br />
               <p style={{ fontSize: "1.5rem" }}>
@@ -125,7 +125,12 @@ export default function RenderBill({ workSpot, recordData }) {
           <tr>
             <td
               className="center"
-              style={{ whiteSpace: "nowrap", fontSize: "22px" }}
+              style={{
+                whiteSpace: "nowrap",
+                fontSize: "22px",
+                paddingTop: "10px",
+                paddingBottom: "10px",
+              }}
             >
               {recordData?.m_id || ""}
             </td>
@@ -164,7 +169,9 @@ export default function RenderBill({ workSpot, recordData }) {
       </table>
 
       <table style={{ width: "100%" }}>
-        <thead>
+        <thead></thead>
+
+        <tbody>
           <tr className="background">
             <th
               rowSpan="2"
@@ -195,9 +202,7 @@ export default function RenderBill({ workSpot, recordData }) {
               કુલ
             </th>
           </tr>
-        </thead>
 
-        <tbody>
           {taxFields?.map((field, index) => {
             const startIndex = index * 2;
             const left = Number(taxes[startIndex] || 0);

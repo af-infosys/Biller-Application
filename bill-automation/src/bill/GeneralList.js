@@ -313,6 +313,7 @@ const GeneralList = () => {
           </h3>
         </header>
 
+        {/* m_id, hourse_id, name, phone ***** *0095, society. */}
         <div className="panel secure-search">
           <h2>તમારી પ્રોપર્ટી શોધો</h2>
           <div className="filter-section">
@@ -379,7 +380,6 @@ const GeneralList = () => {
             </button>
           </div>
         </div>
-
         {/* Message Box */}
         {message && (
           <div
@@ -390,7 +390,6 @@ const GeneralList = () => {
             {message}
           </div>
         )}
-
         {/* Display Property Details */}
         {renderPropertyDetails()}
       </div>

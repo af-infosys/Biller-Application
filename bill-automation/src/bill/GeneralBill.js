@@ -70,7 +70,7 @@ const GeneralBill = () => {
       filename: `Receipt_${recordData?.m_id}.pdf`,
       page: {
         margin: 3,
-        format: [195, 450],
+        format: [195, 480],
         orientation: "portrait",
       },
       canvas: {

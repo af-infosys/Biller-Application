@@ -79,6 +79,10 @@ const BillReceipt = () => {
         `${await apiPath()}/api/bill-data/${sheetId}/${id}`,
         {
           method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
@@ -108,7 +112,7 @@ const BillReceipt = () => {
       filename: `Receipt_${recordData?.m_id}.pdf`,
       page: {
         margin: 3,
-        format: [195, 450],
+        format: [195, 480],
         orientation: "portrait",
       },
       canvas: {
