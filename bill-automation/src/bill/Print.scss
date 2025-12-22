@@ -1,0 +1,10 @@
+body {
+  max-width: 700px !important;
+  background: transparent;
+  max-height: 1530px !important;
+
+  #pdf-content {
+    max-height: 1530px !important;
+    overflow: hidden;
+  }
+}

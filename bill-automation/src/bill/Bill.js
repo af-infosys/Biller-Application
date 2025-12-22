@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import generatePDF from "react-to-pdf";
 import "./Bill.css";
 import apiPath from "../isProduction";
@@ -8,6 +8,8 @@ import RenderBill from "./RenderBill";
 
 // --- The Main React Component ---
 const BillReceipt = () => {
+  const navigate = useNavigate();
+
   const [recordData, setRecordData] = useState(null);
   const [loadingError, setLoadingError] = useState(null);
 
@@ -156,7 +158,12 @@ const BillReceipt = () => {
         <Link to="/" className="back-button">
           ⬅️ Go Back
         </Link>
-        <button id="print-btn" type="button" onClick={printReceipt}>
+        {/* <button id="print-btn" type="button" onClick={printReceipt}> */}
+        <button
+          id="print-btn"
+          type="button"
+          onClick={() => navigate(`/print/${id}`)}
+        >
           🖨️ Print Bill
         </button>
         <button id="download-btn" type="button" onClick={downloadPDF}>

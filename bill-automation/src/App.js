@@ -16,6 +16,7 @@ import GeneralList from "./bill/GeneralList";
 import Login from "./bill/Login";
 import ProtectedRoute from "./ProtectedRoute";
 import GeneralBill from "./bill/GeneralBill";
+import Print from "./bill/Print";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           >
             <Route index element={<Main />} />
             <Route path="bill/:id" element={<Bill />} />
+            <Route path="print/:id" element={<Print />} />
           </Route>
 
           <Route path="/general/:sheetId" element={<GeneralList />} />
