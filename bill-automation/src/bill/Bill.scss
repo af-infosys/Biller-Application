@@ -1,0 +1,139 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  font-weight: 500;
+}
+body {
+  background: transparent;
+  max-height: fit-content !important;
+
+  #pdf-content {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    max-height: fit-content !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 0;
+    // border-right: 2px solid red;
+
+    div {
+      max-width: 100% !important;
+
+      table {
+        width: 80mm !important;
+        max-width: 80mm !important;
+        overflow: scroll;
+
+        h3 {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+}
+
+.normal-size {
+  font-size: 2.5mm;
+}
+.normal-size2 {
+  font-size: 2.7mm;
+}
+
+table {
+  max-width: 100%;
+  border: 1.5px solid black;
+  border-collapse: collapse;
+}
+
+table,
+th,
+td {
+  border: 0.3mm solid black;
+  padding: 0.4mm;
+}
+
+th {
+  font-weight: 500;
+}
+
+button,
+a {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: #115e59;
+  color: white;
+  font-size: 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.left {
+  text-align: left;
+}
+
+.bold {
+  font-weight: 600;
+}
+
+.center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}
+.right > td[colspan="2"] {
+  text-align: left;
+}
+
+.fit-width {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: center;
+  min-width: fit-content;
+}
+.fit-width span {
+  white-space: nowrap;
+}
+
+/* .middle-table,
+      .middle-table th,
+      .middle-table td {
+        border-collapse: collapse;
+        border: 0;
+      }
+      .middle-table {
+        border-left: 2px solid black;
+        border-right: 2px solid black;
+      }
+      .middle-table tr {
+        border-bottom: 1px solid black;
+      }
+      .middle-table tr:last-child {
+        border-bottom: 0 !important;
+      } */
+
+button:hover,
+a:hover {
+  background-color: #0f766e;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.back-button {
+  background-color: #c3ccff;
+  color: #333;
+  border: 1px solid #ccc;
+  text-decoration: none;
+}

@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../config/AuthContext";
 import apiPath from "../isProduction";
 
-import "./Print.scss";
+import "./Bill.scss";
 
 const Print = () => {
   const [recordData, setRecordData] = useState(null);
@@ -51,9 +51,37 @@ const Print = () => {
       const data = await result.json();
 
       setRecordData(data?.record);
+      updateMark();
     } catch (error) {
       console.error("Error fetching data:", error);
       window.alert("Error Tracking Your Bill!");
+    }
+  };
+
+  const updateMark = async () => {
+    try {
+      const sheetId = workSpot?.id;
+
+      if (!sheetId) {
+        return;
+      }
+
+      const result = await fetch(
+        `${await apiPath()}/api/bill-data/${sheetId}/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!result.ok) {
+        throw new Error("Network response was not ok");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
   };
 

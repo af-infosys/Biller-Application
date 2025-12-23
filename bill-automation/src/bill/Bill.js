@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import generatePDF from "react-to-pdf";
-import "./Bill.css";
+import "./Bill.scss";
 import apiPath from "../isProduction";
 import { useAuth } from "../config/AuthContext";
 import RenderBill from "./RenderBill";

@@ -292,7 +292,7 @@ const Main = () => {
                   }}
                 >
                   <a
-                    href={`bill/${item?.m_id}`}
+                    href={`print/${item?.m_id}`}
                     style={{ maxWidth: "fit-content", marginBottom: "0" }}
                     className="action-button"
                   >
@@ -384,7 +384,7 @@ const Main = () => {
                     <td>{item?.phone}</td>
                     <td>₹{totalDue.toFixed(2)}</td>
                     <td>
-                      <a href={`bill/${item?.m_id}`} className="action-button">
+                      <a href={`print/${item?.m_id}`} className="action-button">
                         View
                       </a>
                       <a

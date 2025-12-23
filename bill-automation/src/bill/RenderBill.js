@@ -51,20 +51,33 @@ export default function RenderBill({ workSpot, recordData }) {
     );
 
   return (
-    <div style={{ width: "100%" }}>
-      <table style={{ width: "100%" }}>
+    <div>
+      <table style={{ maxWidth: "80mm" }}>
         <thead>
           <tr style={{ position: "relative" }}>
-            <th colSpan="6" className="bold" style={{ paddingTop: "20px" }}>
-              <span className="bold village-name">{workSpot?.gaam}</span>{" "}
+            <th
+              colSpan="6"
+              className="bold"
+              style={{
+                paddingTop: "20px",
+                fontSize: "2.7mm",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "2.5mm",
+                }}
+              >
+                {workSpot?.gaam}
+              </span>{" "}
               ગ્રામપંચાયત <br />
-              <p style={{ fontSize: "1.5rem" }}>
+              <p style={{ fontSize: "3.2mm" }}>
                 મુ. <span className="bold">{workSpot?.gaam}</span> તા.{" "}
                 <span className="bold">{workSpot?.taluko}</span> જિ.{" "}
                 <span className="bold">{workSpot?.district}</span>
               </p>
               <h2>મંગણાં નું બીલ</h2>
-              <p style={{ fontSize: "1.5rem" }}>
+              <p style={{ fontSize: "3mm" }}>
                 (ગ્રામ પંચાયત એક્ટની કલમ ૨૧૫(૧) મુજબ) <br /> આ બિલની રકમ ૧૫ દિવસ
                 માં અચૂક જમા કરાવવી
               </p>
@@ -73,7 +86,7 @@ export default function RenderBill({ workSpot, recordData }) {
                   position: "absolute",
                   top: ".3rem",
                   right: ".3rem",
-                  fontSize: "1.3rem",
+                  fontSize: "2.8mm",
                 }}
               >
                 *ગ્રાહક કોપી*
@@ -84,41 +97,41 @@ export default function RenderBill({ workSpot, recordData }) {
 
         <tbody>
           <tr>
-            <td className="left" colSpan="6">
+            <td className="left" colSpan="6" style={{ fontSize: "3.5mm" }}>
               <span>શ્રીમાન /શ્રીમતી :</span>{" "}
               <span className="bold">{recordData?.owner_name}</span>
             </td>
           </tr>
           <tr>
-            <td className="left" colSpan="6">
+            <td className="left" colSpan="6" style={{ fontSize: "3.5mm" }}>
               <span>કબ્જેદાર :</span>{" "}
               <span className="bold">{recordData?.other_name}</span>
             </td>
           </tr>
           <tr>
-            <td className="left" colSpan="6">
+            <td className="left" colSpan="6" style={{ fontSize: "3.5mm" }}>
               <span>સરનામું :</span>{" "}
               <span className="bold">{recordData?.society}</span>
             </td>
           </tr>
 
           <tr>
-            <th className="bold weak center" style={{ fontSize: "23px" }}>
+            <th className="bold center" style={{ fontSize: "2.7mm" }}>
               મિલકત નંબર
             </th>
-            <th className="bold weak center" style={{ fontSize: "23px" }}>
+            <th className="bold center" style={{ fontSize: "2.7mm" }}>
               જૂનો મિલકત નં.
             </th>
-            <th className="bold weak center" style={{ fontSize: "23px" }}>
+            <th className="bold center" style={{ fontSize: "2.7mm" }}>
               બિલ નંબર
             </th>
-            <th className="bold weak center" style={{ fontSize: "23px" }}>
+            <th className="bold center" style={{ fontSize: "2.7mm" }}>
               બિલની તારીખ
             </th>
-            <th className="bold weak center" style={{ fontSize: "23px" }}>
+            <th className="bold center" style={{ fontSize: "2.7mm" }}>
               છેલ્લી તારીખ
             </th>
-            <th className="bold weak center" style={{ fontSize: "23px" }}>
+            <th className="bold center" style={{ fontSize: "2.7mm" }}>
               મુદત વર્ષ
             </th>
           </tr>
@@ -127,40 +140,40 @@ export default function RenderBill({ workSpot, recordData }) {
               className="center"
               style={{
                 whiteSpace: "nowrap",
-                fontSize: "22px",
-                paddingTop: "10px",
-                paddingBottom: "10px",
+                fontSize: "3mm",
+                paddingTop: ".5mm",
+                paddingBottom: ".5mm",
               }}
             >
               {recordData?.m_id || ""}
             </td>
             <td
               className="center"
-              style={{ whiteSpace: "nowrap", fontSize: "22px" }}
+              style={{ whiteSpace: "nowrap", fontSize: "2.5mm" }}
             >
               {recordData?.old_id || ""}
             </td>
             <td
               className="center"
-              style={{ whiteSpace: "nowrap", fontSize: "22px" }}
+              style={{ whiteSpace: "nowrap", fontSize: "2.5mm" }}
             >
               {recordData?.bill_no || ""}
             </td>
             <td
               className="center"
-              style={{ whiteSpace: "nowrap", fontSize: "22px" }}
+              style={{ whiteSpace: "nowrap", fontSize: "2.5mm" }}
             >
               {formatDate(bill_date) || ""}
             </td>
             <td
               className="center"
-              style={{ whiteSpace: "nowrap", fontSize: "22px" }}
+              style={{ whiteSpace: "nowrap", fontSize: "2.5mm" }}
             >
               {formatDate(due_date) || ""}
             </td>
             <td
               className="center"
-              style={{ whiteSpace: "nowrap", fontSize: "22px" }}
+              style={{ whiteSpace: "nowrap", fontSize: "2.5mm" }}
             >
               {year || ""}
             </td>
@@ -168,7 +181,7 @@ export default function RenderBill({ workSpot, recordData }) {
         </tbody>
       </table>
 
-      <table style={{ width: "100%" }}>
+      <table style={{ width: "100%", maxWidth: "80mm" }}>
         <thead></thead>
 
         <tbody>
@@ -176,29 +189,29 @@ export default function RenderBill({ workSpot, recordData }) {
             <th
               rowSpan="2"
               className="background"
-              style={{ fontSize: "1.4rem" }}
+              style={{ fontSize: "2.5mm", maxWidth: "15mm" }}
             >
               વેરા કે બીજી લેણી રકમ ની વિગત
             </th>
-            <th colSpan="4" style={{ fontSize: "1.4rem" }}>
+            <th colSpan="4" style={{ fontSize: "2.5mm" }}>
               વેરાની સંપૂર્ણ વિગત નીચે પ્રમાણે છે.
             </th>
-            <th rowSpan="2" style={{ fontSize: "1.4rem" }}>
+            <th rowSpan="2" style={{ fontSize: "2.2mm", maxWidth: "20mm" }}>
               મંગણાંની રકમ ભરવામાં કસર કરતાં હોય તે વિગત
             </th>
           </tr>
 
           <tr>
-            <th className="background" style={{ fontSize: "1.4rem" }}>
+            <th className="background" style={{ fontSize: "2.5mm" }}>
               વેરાનો દર
             </th>
-            <th className="background" style={{ fontSize: "1.4rem" }}>
+            <th className="background" style={{ fontSize: "2.5mm" }}>
               ચા.બાકી
             </th>
-            <th className="background" style={{ fontSize: "1.4rem" }}>
+            <th className="background" style={{ fontSize: "2.5mm" }}>
               પા.બાકી
             </th>
-            <th className="background" style={{ fontSize: "1.4rem" }}>
+            <th className="background" style={{ fontSize: "2.5mm" }}>
               કુલ
             </th>
           </tr>
@@ -210,22 +223,28 @@ export default function RenderBill({ workSpot, recordData }) {
 
             return (
               <tr key={field.id} className="right">
-                <td style={{ fontSize: "27px" }}>{field.name}</td>
-                <td style={{ fontSize: "27px" }}></td>
-                <td style={{ fontSize: "27px" }}>{left.toFixed(2)}</td>
-                <td style={{ fontSize: "27px" }}>{right.toFixed(2)}</td>
-                <td style={{ fontSize: "27px" }}>
+                <td style={{ fontSize: "2.8mm", padding: ".3mm 1mm" }}>
+                  {field.name}
+                </td>
+                <td style={{ fontSize: "2.5mm", padding: ".5mm 1mm" }}></td>
+                <td style={{ fontSize: "2.5mm", padding: ".5mm 1mm" }}>
+                  {left.toFixed(2)}
+                </td>
+                <td style={{ fontSize: "2.5mm", padding: ".5mm 1mm" }}>
+                  {right.toFixed(2)}
+                </td>
+                <td style={{ fontSize: "2.5mm", padding: ".5mm 1mm" }}>
                   {(left + right).toFixed(2)}
                 </td>
-                <td style={{ fontSize: "27px" }}></td>
+                <td style={{ fontSize: "2.5mm", padding: ".5mm 1mm" }}></td>
               </tr>
             );
           })}
 
           <tr className="background">
-            <th className="bold">કુલ</th>
+            <th className="bold normal-size">કુલ</th>
             <td></td>
-            <th className="bold right">
+            <th className="bold right normal-size">
               {Number(taxes[0]) +
                 Number(taxes[2]) +
                 Number(taxes[4]) +
@@ -240,7 +259,7 @@ export default function RenderBill({ workSpot, recordData }) {
                 Number(taxes[22]) +
                 Number(taxes[24])}
             </th>
-            <th className="bold right">
+            <th className="bold right normal-size">
               {Number(taxes[1]) +
                 Number(taxes[3]) +
                 Number(taxes[5]) +
@@ -255,14 +274,18 @@ export default function RenderBill({ workSpot, recordData }) {
                 Number(taxes[23]) +
                 Number(taxes[25])}
             </th>
-            <th className="bold right">{totalDue}</th>
+            <th className="bold right normal-size2">
+              {totalDue?.toFixed("2", "0")}
+            </th>
             <td></td>
           </tr>
 
           <tr>
-            <td colSpan="6">
+            <td colSpan="6" className="normal-size">
               કુલ રૂપિયા શબ્દોમાં :{" "}
-              <span className="bold">{numberToGujaratiWords(totalDue)}</span>
+              <span className="bold normal-size2">
+                {numberToGujaratiWords(totalDue)} /-
+              </span>
             </td>
           </tr>
         </tbody>
@@ -271,11 +294,11 @@ export default function RenderBill({ workSpot, recordData }) {
       <div
         style={{
           width: "100%",
-          border: "2px solid black",
-          padding: "10px",
+          border: ".3mm solid black",
+          padding: "1mm",
           fontFamily: "'Noto Sans Gujarati', 'Shruti', sans-serif",
-          fontSize: "18px",
-          lineHeight: 1.8,
+          fontSize: "2mm",
+          lineHeight: 1.4,
         }}
       >
         ઉપરની જણાવેલ રકમ તમારી પાસે પંચાયતની લેણી નીકળે છે અને તેથી તમને જાણ
@@ -292,18 +315,18 @@ export default function RenderBill({ workSpot, recordData }) {
       <table>
         <tr>
           <td>
-            <p style={{ whiteSpace: "nowrap", fontSize: "1.55rem" }}>
+            <p style={{ whiteSpace: "nowrap", fontSize: "2.5mm" }}>
               સ્થળ :<span className="bold village-name">{workSpot?.gaam}</span>{" "}
               ગ્રામપંચાયત
             </p>
 
             <hr />
-            <p style={{ fontSize: "1rem", margin: "5px" }}>
+            <p style={{ fontSize: "2mm", margin: "1mm" }}>
               by- A.F. Infosys - 93764 43146
             </p>
           </td>
 
-          <td style={{ fontSize: "1.6rem" }}>
+          <td style={{ fontSize: "2.5mm", padding: "1mm" }}>
             સરપંચ
             <br />
             <p style={{ whiteSpace: "nowrap" }}>
