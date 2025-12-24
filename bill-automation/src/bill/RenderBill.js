@@ -52,7 +52,7 @@ export default function RenderBill({ workSpot, recordData }) {
 
   return (
     <div>
-      <table style={{ maxWidth: "100vw" }}>
+      <table style={{ maxWidth: "95vw" }}>
         <thead>
           <tr style={{ position: "relative" }}>
             <th
@@ -110,13 +110,25 @@ export default function RenderBill({ workSpot, recordData }) {
           </tr>
 
           <tr>
-            <th className="bold center" style={{ fontSize: "4.3vw" }}>
+            <th
+              className="bold center"
+              style={{
+                fontSize: "4.3vw",
+                maxWidth: "12vw",
+              }}
+            >
               મિલકત નંબર
             </th>
-            <th className="bold center" style={{ fontSize: "4vw" }}>
+            <th
+              className="bold center"
+              style={{ fontSize: "4vw", maxWidth: "13vw" }}
+            >
               જૂનો મિલકત નં.
             </th>
-            <th className="bold center" style={{ fontSize: "4.3vw" }}>
+            <th
+              className="bold center"
+              style={{ fontSize: "4.3vw", maxWidth: "12vw" }}
+            >
               બિલ નંબર
             </th>
             <th className="bold center" style={{ fontSize: "4.3vw" }}>
@@ -136,6 +148,7 @@ export default function RenderBill({ workSpot, recordData }) {
                 whiteSpace: "nowrap",
                 paddingTop: ".5mm",
                 paddingBottom: ".5mm",
+                maxWidth: "5vw",
               }}
             >
               {recordData?.m_id || ""}
@@ -146,13 +159,13 @@ export default function RenderBill({ workSpot, recordData }) {
             <td className="center normal-size" style={{ whiteSpace: "nowrap" }}>
               {recordData?.bill_no || ""}
             </td>
-            <td className="center normal-size" style={{ whiteSpace: "nowrap" }}>
+            <td className="center min-size" style={{ whiteSpace: "nowrap" }}>
               {formatDate(bill_date) || ""}
             </td>
-            <td className="center normal-size" style={{ whiteSpace: "nowrap" }}>
+            <td className="center min-size" style={{ whiteSpace: "nowrap" }}>
               {formatDate(due_date) || ""}
             </td>
-            <td className="center normal-size" style={{ whiteSpace: "nowrap" }}>
+            <td className="center min-size" style={{ whiteSpace: "nowrap" }}>
               {year || ""}
             </td>
           </tr>
@@ -166,12 +179,12 @@ export default function RenderBill({ workSpot, recordData }) {
           <tr className="background">
             <th
               rowSpan="2"
-              className="background normal-size2"
+              className="background normal-size"
               style={{ maxWidth: "30vw" }}
             >
               વેરા કે બીજી લેણી રકમ ની વિગત
             </th>
-            <th colSpan="4" className="normal-size2">
+            <th colSpan="4" className="normal-size">
               વેરાની સંપૂર્ણ વિગત નીચે પ્રમાણે છે.
             </th>
             <th
@@ -184,10 +197,10 @@ export default function RenderBill({ workSpot, recordData }) {
           </tr>
 
           <tr>
-            <th className="background normal-size2">વેરાનો દર</th>
-            <th className="background normal-size2">ચા.બાકી</th>
-            <th className="background normal-size2">પા.બાકી</th>
-            <th className="background normal-size2">કુલ</th>
+            <th className="background normal-size">વેરાનો દર</th>
+            <th className="background normal-size">ચા.બાકી</th>
+            <th className="background normal-size">પા.બાકી</th>
+            <th className="background normal-size">કુલ</th>
           </tr>
 
           {taxFields?.map((field, index) => {
@@ -205,13 +218,13 @@ export default function RenderBill({ workSpot, recordData }) {
                   style={{ padding: ".5mm 1mm" }}
                 ></td>
                 <td className="normal-size" style={{ padding: ".5mm 1mm" }}>
-                  {left.toFixed(2)}
+                  {left}
                 </td>
                 <td className="normal-size" style={{ padding: ".5mm 1mm" }}>
-                  {right.toFixed(2)}
+                  {right}
                 </td>
                 <td className="normal-size" style={{ padding: ".5mm 1mm" }}>
-                  {(left + right).toFixed(2)}
+                  {left + right}
                 </td>
                 <td
                   className="normal-size"
@@ -255,7 +268,7 @@ export default function RenderBill({ workSpot, recordData }) {
                 Number(taxes[25])}
             </th>
             <th className="bold right normal-size2">
-              {totalDue?.toFixed("2", "0")}
+              {totalDue?.toFixed("1", "0")}
             </th>
             <td></td>
           </tr>
