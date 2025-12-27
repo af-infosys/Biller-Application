@@ -51,7 +51,6 @@ const Print = () => {
       const data = await result.json();
 
       setRecordData(data?.record);
-      updateMark();
     } catch (error) {
       console.error("Error fetching data:", error);
       window.alert("Error Tracking Your Bill!");
@@ -61,6 +60,8 @@ const Print = () => {
   const updateMark = async () => {
     try {
       const sheetId = workSpot?.id;
+
+      console.log("updating Status for", sheetId, workSpot);
 
       if (!sheetId) {
         return;
@@ -88,6 +89,10 @@ const Print = () => {
   useEffect(() => {
     fetchDataFromSheetMain();
   }, []);
+
+  useEffect(() => {
+    updateMark();
+  }, [workSpot]);
 
   if (loadingError) {
     return (
