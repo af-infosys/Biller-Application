@@ -14,8 +14,8 @@ export default function RenderBill({ workSpot, recordData }) {
 
   const taxFields = [
     { id: "houseTax", name: "ઘરવેરો" },
-    { id: "saPaTax", name: "સા.પાણી વેરો" },
-    { id: "specialWaterTax", name: "ખા.પાણી વેરો" },
+    { id: "saPaTax", name: "સામાન્ય પાણી વેરો" },
+    { id: "specialWaterTax", name: "ખાસ પાણી નળવેરો" },
     { id: "lightTax", name: "લાઈટવેરો" },
     { id: "cleaningTax", name: "સફાઈ વેરો" },
     { id: "sewerTax", name: "ગટર વેરો" },
@@ -51,7 +51,7 @@ export default function RenderBill({ workSpot, recordData }) {
     );
 
   return (
-    <div>
+    <div style={{ paddingBottom: "30px" }}>
       <table style={{ maxWidth: "95vw" }}>
         <thead>
           <tr style={{ position: "relative" }}>
@@ -117,13 +117,13 @@ export default function RenderBill({ workSpot, recordData }) {
                 maxWidth: "12vw",
               }}
             >
-              મિલકત નંબર
+              મિલ્કત નંબર
             </th>
             <th
               className="bold center"
               style={{ fontSize: "4vw", maxWidth: "13vw" }}
             >
-              જૂનો મિલકત નં.
+              જૂનો મિલ્કત નં.
             </th>
             <th
               className="bold center"
@@ -192,14 +192,14 @@ export default function RenderBill({ workSpot, recordData }) {
               rowSpan="2"
               style={{ maxWidth: "30vw" }}
             >
-              મંગણાંની રકમ ભરવામાં કસર કરતાં હોય તે વિગત
+              માંગણા રકમ ભરવામાં કસર કરતાં હોય તે વિગત
             </th>
           </tr>
 
           <tr>
             <th className="background normal-size">વેરાનો દર</th>
-            <th className="background normal-size">ચા.બાકી</th>
-            <th className="background normal-size">પા.બાકી</th>
+            <th className="background normal-size">ચાલું બાકી</th>
+            <th className="background normal-size">પાછલી બાકી</th>
             <th className="background normal-size">કુલ</th>
           </tr>
 
