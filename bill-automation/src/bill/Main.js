@@ -50,7 +50,7 @@ const Main = () => {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
 
         const data = await response.json();
@@ -102,7 +102,7 @@ const Main = () => {
     } catch (error) {
       console.error("Error fetching data:", error);
       window.alert(
-        "ડેટા લોડ કરવામાં ક્ષમતા નિષ્ફળ ગઈ. કૃપા કરીને ફરી પ્રયાસ કરો."
+        "ડેટા લોડ કરવામાં ક્ષમતા નિષ્ફળ ગઈ. કૃપા કરીને ફરી પ્રયાસ કરો.",
       );
       setAllRecords([]);
       setFilteredRecords([]);
@@ -150,7 +150,7 @@ const Main = () => {
 
         // Match if all search words are present in the owner name words
         matchesName = searchWords.every((word) =>
-          ownerNameWords.includes(word)
+          ownerNameWords.includes(word),
         );
 
         // Fallback for full name search if word-based fails (for robustness)
@@ -422,8 +422,12 @@ const Main = () => {
 
   if (workSpot?.notassigned) {
     return (
-      <div>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         <h1>Work Not Assigned Yet!</h1>
+
+        <button onClick={logout} style={{ background: "red" }}>
+          Logout
+        </button>
       </div>
     );
   }
