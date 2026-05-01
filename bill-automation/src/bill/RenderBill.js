@@ -1,3 +1,4 @@
+import { useAuth } from "../config/AuthContext";
 import numberToGujaratiWords from "./NumberToGujarati";
 
 export default function RenderBill({ workSpot, recordData }) {
@@ -43,11 +44,17 @@ export default function RenderBill({ workSpot, recordData }) {
   const y = bill_date.getFullYear();
   const year = `${y}/${String(y + 1).slice(-2)}`;
 
+  const { logout } = useAuth();
+
   if (!workSpot || !recordData)
     return (
-      <>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         <h1>Loading your Bill</h1>
-      </>
+
+        <button onClick={logout} style={{ background: "red" }}>
+          Logout
+        </button>
+      </div>
     );
 
   return (

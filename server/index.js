@@ -15,8 +15,8 @@ const PORT = 5000;
 
 const executablePath = "/usr/bin/google-chrome";
 
-const apiPath = "https://a-f-infosys-smart-management-plxw.onrender.com";
-// const apiPath = "http://localhost:4000";
+// const apiPath = "https://a-f-infosys-smart-management-plxw.onrender.com";
+const apiPath = "http://localhost:5000";
 
 app.get("/", (req, res) => {
   res.send("Hello World <a href='/fetch-data'>Get Logged In</a>");
@@ -30,31 +30,31 @@ async function getOptionValueByText(page, selectName, visibleText) {
       if (!select) return null;
 
       const option = Array.from(select.options).find(
-        (opt) => opt.textContent.trim() === visibleText
+        (opt) => opt.textContent.trim() === visibleText,
       );
       return option ? option.value : null;
     },
     selectName,
-    visibleText
+    visibleText,
   );
 
   console.log(
     `🎯 Found value for "${visibleText}" in ${selectName}:`,
-    optionValue
+    optionValue,
   );
   return optionValue;
 }
 
 // 📌 GET Title API
 app.post("/fetch-data", async (req, res) => {
-  const { login_id, password } = req.body;
+  // const { login_id, password } = req.body;
 
-  if (!login_id || !password) {
-    return res.status(400).json({ error: "Missing login_id or password" });
-  }
+  // if (!login_id || !password) {
+  //   return res.status(400).json({ error: "Missing login_id or password" });
+  // }
 
-  // const login_id = "23994";
-  // password = "Paty@2026";
+  const login_id = "16228";
+  password = "Ahhj@14788";
 
   const workId = login_id;
 
@@ -62,7 +62,7 @@ app.post("/fetch-data", async (req, res) => {
     "Chromium path:",
     process.env.PRODUCTION == "true"
       ? puppeteer.executablePath()
-      : "==== not Chrome Path ===="
+      : "==== not Chrome Path ====",
   );
 
   try {
@@ -126,7 +126,7 @@ app.post("/fetch-data", async (req, res) => {
     const moduleValue = await getOptionValueByText(
       page,
       "DDLModule",
-      "પંચાયત વેરો"
+      "પંચાયત વેરો",
     );
     const userValue = await getOptionValueByText(page, "DDLUser", "તલાટી");
 
@@ -169,7 +169,7 @@ app.post("/fetch-data", async (req, res) => {
     await page.evaluate((userValue) => {
       const select = document.querySelector('select[name="DDLUser"]');
       const option = Array.from(select.options).find(
-        (opt) => opt.value === userValue
+        (opt) => opt.value === userValue,
       );
 
       if (option) {
@@ -211,7 +211,7 @@ app.post("/fetch-data", async (req, res) => {
     do {
       try {
         captchaValue = await page.$eval('input[name="txtCaptcha"]', (el) =>
-          el.value.trim()
+          el.value.trim(),
         );
         console.log("waiting for captcha...");
       } catch (e) {
@@ -223,7 +223,7 @@ app.post("/fetch-data", async (req, res) => {
     // Set captcha confirm
     await page.type(
       'input[name="txtCompare"]',
-      captchaValue.replace(/\s+/g, "")
+      captchaValue.replace(/\s+/g, ""),
     );
 
     // Submit form
@@ -274,12 +274,12 @@ app.post("/fetch-data", async (req, res) => {
       // Starting Id
       await page.type(
         'input[name="ctl00$ContentPlaceHolder1$txtnMilkatNo"]',
-        "1"
+        "1",
       );
       // Ending ID / Total Milkat
       await page.type(
         'input[name="ctl00$ContentPlaceHolder1$txtnMilkatNoTo"]',
-        "100000"
+        "100000",
       );
       // Find Button
       await Promise.all([
@@ -804,7 +804,7 @@ app.listen(PORT, () => {
       process.env.PRODUCTION == "true"
         ? "https://web-automation-oqmy.onrender.com"
         : `http://localhost:${PORT}`
-    }`
+    }`,
   );
 });
 
